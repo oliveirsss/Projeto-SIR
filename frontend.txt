@@ -1,0 +1,21 @@
+Frontend
+    Função
+    .Interface onde o utilizador:
+        - vê feed de eventos
+        - confirma presença
+        - comenta
+        - recebe notificações em tempo real
+
+    .Tecnologias sugeridas
+        - React.js ou Next.js (ideal para Vercel)
+        - TailwindCSS ou Bootstrap
+        - Ligação a API REST via Axios / Fetch
+        - Ligação a WebSockets via socket.io-client
+
+    .Componentes principais
+        - /pages/login
+        - /pages/register
+        - /pages/events
+        - /pages/event/[id]
+        - /pages/admin
+        - Componentes globais: Navbar, EventCard, ChatBox…

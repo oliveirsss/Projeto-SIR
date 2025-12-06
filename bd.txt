@@ -1,0 +1,38 @@
+Base de Dados MongoDB
+    .Coleções
+        - users
+            {
+            "_id": "...",
+            "name": "Pedro Carvalho",
+            "email": "29268@alunos.ipvc.pt",
+            "password": "...hashed...",
+            "type": "student | organizer | admin",
+            "photo": "url"
+            }
+
+        - events
+            {
+            "_id": "...",
+            "title": "Workshop de IA",
+            "description": "Introdução à IA generativa",
+            "date": "2025-11-30T14:00",
+            "location": "Auditório ESTG",
+            "category": "Workshop",
+            "organizerId": "userId",
+            "image": "url"
+            }
+
+        - rsvps
+            {
+            "userId": "...",
+            "eventId": "...",
+            "status": "going"
+            }
+
+        - comments
+            {
+            "userId": "...",
+            "eventId": "...",
+            "text": "A que horas começa?",
+            "date": "2025-11-20T10:15"
+            }

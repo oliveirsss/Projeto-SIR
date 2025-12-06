@@ -1,0 +1,42 @@
+Backend — API REST
+    .Tecnologia
+        - Node.js
+        - Express.js
+        - Socket.IO
+        - Mongoose
+
+    .Estrutura recomendada
+        /src
+            /config
+            /controllers
+            /routes
+            /models
+            /middleware
+            /services
+            /sockets
+
+    .Principais módulos
+        ✔ Autenticação (JWT)
+            - POST /register
+            - POST /login
+            - Middleware: authMiddleware para validar tokens
+
+        ✔ Eventos
+            - GET /events
+            - GET /events/:id
+            - POST /events (organizador)
+            - PUT /events/:id
+            - DELETE /events/:id
+
+        ✔ Inscrições (RSVP)
+            - POST /events/:id/rsvp
+            - GET /events/:id/rsvp
+
+        ✔ Comentários / Chat
+            - GET /events/:id/comments
+            - POST /events/:id/comments
+            - (WebSocket) mensagem em tempo real
+
+        ✔ Admin
+            - GET /users/pending
+            - PATCH /users/:id/approve

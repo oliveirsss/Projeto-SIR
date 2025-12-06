@@ -1,0 +1,7 @@
+Estruturar a arquitetura geral (frontend + backend + sockets)
+Criar o modelo das coleções MongoDB
+Definir os endpoints da API REST
+Criar o diagrama de sequência ou diagrama lógico da BD
+Escrever a Fase 2 completa
+Planear as tecnologias (Express, Socket.IO, JWT, etc.)
+

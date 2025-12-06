@@ -1,0 +1,16 @@
+Backend — WebSockets (Socket.IO)
+    .Será utilizado para:
+        - chat de cada evento
+        - notificações quando um novo evento é criado
+        - notificações quando há novos comentários
+        - atualização instantânea da lista "Vou"
+
+    .Estrutura recomendada
+        - /src/sockets/events.socket.js
+        - /src/sockets/comments.socket.js
+        - /src/sockets/notifications.socket.js
+
+    .Fluxo básico
+        - Cliente entra numa página de evento → junta-se à “room” do evento.
+        - Quando alguém comenta → Broadcast para todos na mesma room.
+        - Quando um novo evento é criado → Envio global a todos os utilizadores conectados.
