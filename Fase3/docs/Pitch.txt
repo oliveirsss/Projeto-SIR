@@ -1,0 +1,8 @@
+Conteudo obrigatorio do pitch:
+	. Nome e tema da aplicação;
+	. Problema / necessidade real que a aplicação pretende resolver;
+	. Público-alvo e contexto ded utilização;
+	. Principais funcionalidades previstas;
+	. Modelo de interação ou mockups principais;
+	. Valor acrescentado / impacto esperado;
+	. Ferramentas e tecnologias previstas;

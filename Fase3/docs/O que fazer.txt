@@ -1,0 +1,7 @@
+Fase 3 - Protótipo Funcional e Revisão Cruzada
+
+	- Desenvolvimento de um protótipo funcional mínimo (MVP);
+	- Código no GitHub Classroom com commits regulares;
+	- Revisão por pull request a dois outros projetos;
+
+Entrega: Protótipo funcional + documentação no README

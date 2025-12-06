@@ -1,0 +1,9 @@
+A aplicação a desenvolver deverá:
+	- Ser suportada por uma API RESTful;
+	- Utilizar MongoDB como base de dados;
+	- Utilizar sockets (WebSockets ou Socket.IO);
+	- Backend em Node.js;
+	- Frontend desenvolvido com ou sem framework;
+	- Implementar um sistema de autenticação (Login/Registo);
+	- Fazer deploy em Render.com ou Vercel.com;
+	- Incluir documentação clara no README.md, com instruções de instalação, execução e identificação dos membros do grupo;
