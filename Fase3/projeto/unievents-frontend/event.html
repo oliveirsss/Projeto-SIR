@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>UniEvents - Evento</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <button onclick="goBack()">← Voltar</button>
+
+  <div id="event" class="container"></div>
+
+  <button onclick="rsvp()">Vou ao evento</button>
+
+  <h3>Comentários</h3>
+  <div id="comments"></div>
+
+  <input type="text" id="commentText" placeholder="Escreve um comentário" />
+  <button onclick="sendComment()">Enviar</button>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <script src="js/api.js"></script>
+  <script src="js/socket.js"></script>
+  <script src="js/event.js"></script>
+</body>
+</html>
