@@ -1,0 +1,4 @@
+Conectar Cluster no MongoDB
+
+Backend - npm run dev
+Frontend - npx serve .

@@ -1,38 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-  <meta charset="UTF-8" />
-  <title>UniEvents - Login</title>
-  <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-
-  <h1>UniEvents</h1>
-
-  <div class="container">
-    <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Email" />
-    <input type="password" id="loginPassword" placeholder="Password" />
-    <button onclick="login()">Login</button>
-
-    <hr />
-
-    <h2>Registo</h2>
-    <input type="text" id="registerName" placeholder="Nome" />
-    <input type="email" id="registerEmail" placeholder="Email" />
-    <input type="password" id="registerPassword" placeholder="Password" />
-
-    <select id="registerType">
-      <option value="student">Estudante</option>
-      <option value="organizer">Organizador</option>
-    </select>
-
-    <button onclick="register()">Registar</button>
-
-    <p id="message"></p>
-  </div>
-
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UniEvents</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

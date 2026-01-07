@@ -8,7 +8,8 @@ const EventSchema = new mongoose.Schema({
   category: { type: String, default: 'Other' },
   organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   image: { type: String, default: '' },
-  published: { type: Boolean, default: true }
+  published: { type: Boolean, default: true },
+  isFree: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', EventSchema);
