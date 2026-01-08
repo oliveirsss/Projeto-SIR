@@ -7,7 +7,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // carregar auth do localStorage
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -20,7 +19,6 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // LOGIN
   async function login(email, password) {
     const res = await fetch("http://localhost:4000/api/auth/login", {
       method: "POST",
@@ -41,7 +39,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem("user", JSON.stringify(data.user));
   }
 
-  // LOGOUT
   function logout() {
     setUser(null);
     setToken(null);

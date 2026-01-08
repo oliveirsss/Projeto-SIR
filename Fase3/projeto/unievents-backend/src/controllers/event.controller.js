@@ -3,12 +3,14 @@ const Rsvp = require('../models/Rsvp');
 
 exports.createEvent = async (req, res) => {
   try {
-    const data = { ...req.body, organizerId: req.user._id };
+    const data = {
+      ...req.body,
+      organizerId: req.user._id,
+      image: req.file ? `/uploads/${req.file.filename}` : null,
+    };
+
     const event = new Event(data);
     await event.save();
-
-    // opcional: notificar via socket (emit global) — o socket file tratará
-    req.app.get('io')?.emit('new-event', { event });
 
     res.status(201).json(event);
   } catch (err) {
@@ -43,10 +45,21 @@ exports.getEvents = async (req, res) => {
 
 exports.getEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id).populate('organizerId', 'name email');
-    if (!event) return res.status(404).json({ message: 'Event not found' });
-    const goingCount = await Rsvp.countDocuments({ eventId: event._id, status: 'going' });
-    res.json({ ...event.toObject(), goingCount });
+    const event = await Event.findById(req.params.id)
+      .populate("organizerId", "name email");
+
+    if (!event) {
+      return res.status(404).json({ message: "Evento não encontrado" });
+    }
+
+    const goingCount = await Rsvp.countDocuments({
+      eventId: event._id,
+    });
+
+    res.json({
+      ...event.toObject(),
+      goingCount,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

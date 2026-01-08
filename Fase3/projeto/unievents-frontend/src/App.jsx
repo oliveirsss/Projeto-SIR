@@ -9,37 +9,50 @@ import RequireAuth from "./components/RequireAuth";
 export default function App() {
   return (
     <Routes>
+
+      {/* público */}
       <Route path="/" element={<Login />} />
 
-      <Route path="/user" element={
-          <RequireAuth role="student">
+      {/* student */}
+      <Route
+        path="/user"
+        element={
+          <RequireAuth roles={["student"]}>
             <User />
           </RequireAuth>
         }
       />
 
-      <Route path="/event/:id" element={
+      {/* qualquer utilizador autenticado */}
+      <Route
+        path="/event/:id"
+        element={
           <RequireAuth>
             <Event />
           </RequireAuth>
         }
       />
 
-      <Route path="/organizer" element={
-          <RequireAuth role="organizer">
+      {/* organizer */}
+      <Route
+        path="/organizer"
+        element={
+          <RequireAuth roles={["organizer"]}>
             <Organizer />
           </RequireAuth>
         }
       />
 
-      <Route path="/admin" element={
-          <RequireAuth role="admin">
+      {/* admin */}
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth roles={["admin"]}>
             <Admin />
           </RequireAuth>
         }
       />
 
-      <Route path="/event/:id" element={<Event />} />
     </Routes>
   );
 }

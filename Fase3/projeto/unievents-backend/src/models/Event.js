@@ -7,7 +7,7 @@ const EventSchema = new mongoose.Schema({
   location: { type: String, required: true },
   category: { type: String, default: 'Other' },
   organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  image: { type: String, default: '' },
+  image: { type: String},
   published: { type: Boolean, default: true },
   isFree: { type: Boolean, default: true }
 }, { timestamps: true });

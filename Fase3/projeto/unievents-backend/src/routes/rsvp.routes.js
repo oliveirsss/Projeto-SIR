@@ -1,10 +1,10 @@
-const Rsvp = require("../models/Rsvp");
+const express = require("express");
+const router = express.Router();
+const rsvpCtrl = require("../controllers/rsvp.controller");
+const { authMiddleware } = require("../middleware/auth.middleware");
 
-router.get("/me", auth, async (req, res) => {
-  const rsvps = await Rsvp.find({ 
-    userId: req.user._id,
-    status: { $in: ["going", "interested"] }
-  });
+router.get("/me", authMiddleware, rsvpCtrl.getMyRsvps);
+router.post("/", authMiddleware, rsvpCtrl.createRsvp);
+router.delete("/:eventId", authMiddleware, rsvpCtrl.deleteRsvp);
 
-  res.json(rsvps);
-});
+module.exports = router;

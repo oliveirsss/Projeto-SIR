@@ -1,47 +1,65 @@
-require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/auth.routes');
-const eventsRoutes = require('./routes/events.routes');
-const adminRoutes = require('./routes/admin.routes');
-const socketSetup = require('./sockets');
-const errorMiddleware = require('./middleware/error.middleware');
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+const path = require("path");
+
+const authRoutes = require("./routes/auth.routes");
+const eventRoutes = require("./routes/events.routes");
+const rsvpRoutes = require("./routes/rsvp.routes");
 
 const app = express();
 const server = http.createServer(app);
-const { Server } = require('socket.io');
 
+// SOCKET
+const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET','POST']
-  }
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
 });
 
-// setup sockets
-socketSetup(io);
-
-// make io available in routes/controllers
-app.set('io', io);
+// tornar socket acessível nos controllers
+app.set("io", io);
 
 // middlewares
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  credentials: true
+}));
 app.use(express.json());
 
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
 // routes
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/admin', adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/rsvps", rsvpRoutes);
 
-// error handler
-app.use(errorMiddleware);
+// mongo
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(console.error);
 
-// connect db and start server
-const PORT = process.env.PORT || 4000;
-connectDB(process.env.MONGODB_URI).then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// socket logic
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join-event", (eventId) => {
+    socket.join(eventId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
   });
 });
+
+// server
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () =>
+  console.log("Server running on port", PORT)
+);
