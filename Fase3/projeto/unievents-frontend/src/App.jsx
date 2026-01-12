@@ -1,58 +1,84 @@
-import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import User from "./pages/User";
-import Event from "./pages/Event";
-import Organizer from "./pages/Organizer";
-import Admin from "./pages/Admin";
-import RequireAuth from "./components/RequireAuth";
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import './App.css';
+import EventFeed from './pages/EventFeed';
+import EventDetails from './pages/EventDetails';
+import Login from './pages/login';
+import Register from './pages/Register';
+import CreateEvent from './pages/Organizer';
+import AdminDashboard from './pages/AdminDashboard';
+import Profile from './pages/Profile';
+import { useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 
-export default function App() {
+import LoadingSpinner from './components/LoadingSpinner';
+import Footer from './components/Footer';
+
+// Protected Route Component
+function PrivateRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <LoadingSpinner />;
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+function App() {
+  const { user } = useAuth();
+
   return (
-    <Routes>
+    <LanguageProvider>
+      <div className="app-container">
 
-      {/* público */}
-      <Route path="/" element={<Login />} />
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-      {/* student */}
-      <Route
-        path="/user"
-        element={
-          <RequireAuth roles={["student"]}>
-            <User />
-          </RequireAuth>
-        }
-      />
+            <Route path="/" element={
+              <PrivateRoute>
+                <EventFeed />
+              </PrivateRoute>
+            } />
 
-      {/* qualquer utilizador autenticado */}
-      <Route
-        path="/event/:id"
-        element={
-          <RequireAuth>
-            <Event />
-          </RequireAuth>
-        }
-      />
+            <Route path="/evento/:id" element={
+              <PrivateRoute>
+                <EventDetails />
+              </PrivateRoute>
+            } />
 
-      {/* organizer */}
-      <Route
-        path="/organizer"
-        element={
-          <RequireAuth roles={["organizer"]}>
-            <Organizer />
-          </RequireAuth>
-        }
-      />
+            <Route path="/create" element={
+              <PrivateRoute>
+                <CreateEvent />
+              </PrivateRoute>
+            } />
+            <Route path="/edit/:id" element={
+              <PrivateRoute>
+                <CreateEvent />
+              </PrivateRoute>
+            } />
 
-      {/* admin */}
-      <Route
-        path="/admin"
-        element={
-          <RequireAuth roles={["admin"]}>
-            <Admin />
-          </RequireAuth>
-        }
-      />
+            <Route path="/admin" element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            } />
 
-    </Routes>
+            <Route path="/profile" element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            } />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </LanguageProvider>
   );
 }
+
+export default App;

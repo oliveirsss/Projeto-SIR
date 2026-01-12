@@ -20,9 +20,30 @@ exports.createEvent = async (req, res) => {
 
 exports.getEvents = async (req, res) => {
   try {
-    const { q, category, page = 1, limit = 20 } = req.query;
+    const { q, category, status, page = 1, limit = 20 } = req.query;
     const filter = {};
-    if (q) filter.title = { $regex: q, $options: 'i' };
+    const now = new Date();
+
+    if (status === 'past') {
+      filter.date = { $lt: now };
+    } else if (status === 'upcoming') {
+      // Default behavior or explicit upcoming
+      filter.date = { $gte: now };
+    } else if (status === 'all') {
+      // No date filter, return everything
+    } else if (!status) {
+      // If no status specified, maybe default to upcoming? 
+      // User didn't specify, but for "Realizado" feature we need separation.
+      // Let's default to upcoming to keep feed clean.
+      filter.date = { $gte: now };
+    }
+
+    if (q) {
+      filter.$or = [
+        { title: { $regex: q, $options: 'i' } },
+        { titleEn: { $regex: q, $options: 'i' } }
+      ];
+    }
     if (category) filter.category = category;
 
     const events = await Event.find(filter)

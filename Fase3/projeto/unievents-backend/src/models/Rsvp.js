@@ -14,7 +14,6 @@ const rsvpSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["saved"],
       default: "saved",
     },
   },

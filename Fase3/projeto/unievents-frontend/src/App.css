@@ -10,7 +10,7 @@
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .event-card img {
@@ -38,4 +38,11 @@
 
 .badge.paid {
   background: #dc3545;
+}
+
+/* Layout for Sticky Footer */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }

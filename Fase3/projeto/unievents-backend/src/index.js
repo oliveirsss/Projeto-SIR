@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
@@ -32,12 +32,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// routes
 // routes
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/rsvps", rsvpRoutes);
+app.use("/api/users", require('./routes/users.routes'));
+app.use("/api/comments", require('./routes/comments.routes'));
 
 // mongo
 mongoose

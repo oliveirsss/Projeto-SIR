@@ -37,6 +37,27 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
+
+  async function register(name, email, password) {
+    const res = await fetch("http://localhost:4000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Erro ao registar");
+    }
+
+    // Auto login after register
+    const data = await res.json();
+    setToken(data.token);
+    setUser(data.user);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
   }
 
   function logout() {
@@ -45,8 +66,15 @@ export function AuthProvider({ children }) {
     localStorage.clear();
   }
 
+  function updateUser(userData) {
+    setUser(prev => ({ ...prev, ...userData }));
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const newUser = { ...currentUser, ...userData };
+    localStorage.setItem("user", JSON.stringify(newUser));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,9 +5,10 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true, select: false },
-  type: { type: String, enum: ['student','organizer','admin'], default: 'student' },
+  type: { type: String, enum: ['student', 'organizer', 'admin'], default: 'student' },
   photo: { type: String, default: '' },
-  validated: { type: Boolean, default: false } //para validar organizadores
+  verified: { type: Boolean, default: false },
+  isBanned: { type: Boolean, default: false }
 }, { timestamps: true });
 
 UserSchema.pre('save', async function (next) {

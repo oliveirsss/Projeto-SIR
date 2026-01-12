@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
     const user = new User({ name, email, password, type });
     await user.save();
     const token = generateToken(user);
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, type: user.type }});
+    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, type: user.type } });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -25,12 +25,42 @@ exports.login = async (req, res) => {
   try {
     const user = await User.findOne({ email }).select('+password');
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    if (user.isBanned) return res.status(403).json({ message: 'Conta banida por violação das regras.' });
+
     const ok = await user.comparePassword(password);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = generateToken(user);
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, type: user.type }});
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, type: user.type, photo: user.photo } });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (name) user.name = name;
+    if (req.file) {
+      user.photo = req.file.filename;
+    }
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      type: user.type,
+      photo: user.photo
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating profile" });
   }
 };
