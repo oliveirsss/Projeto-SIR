@@ -15,7 +15,11 @@ const server = http.createServer(app);
 
 // SOCKET
 const { Server } = require("socket.io");
-const allowedOrigins = ["http://localhost:5173", "http://192.168.8.101:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://192.168.8.101:5173",
+  process.env.CORS_ORIGIN // Add the Render variable here
+].filter(Boolean); // Filters out undefined if variable is missing
 
 const io = new Server(server, {
   cors: {
