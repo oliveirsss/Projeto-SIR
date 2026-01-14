@@ -20,14 +20,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(email, password) {
-    const res = await fetch("http://localhost:4000/api/auth/login", {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
-      throw new Error("Login inválido");
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Login inválido");
     }
 
     const data = await res.json();
@@ -41,7 +42,7 @@ export function AuthProvider({ children }) {
   }
 
   async function register(name, email, password) {
-    const res = await fetch("http://localhost:4000/api/auth/register", {
+    const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),

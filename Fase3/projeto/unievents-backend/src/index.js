@@ -15,10 +15,13 @@ const server = http.createServer(app);
 
 // SOCKET
 const { Server } = require("socket.io");
+const allowedOrigins = ["http://localhost:5173", "http://192.168.8.101:5173"];
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -27,7 +30,7 @@ app.set("io", io);
 
 // middlewares
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
@@ -41,6 +44,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/rsvps", rsvpRoutes);
 app.use("/api/users", require('./routes/users.routes'));
 app.use("/api/comments", require('./routes/comments.routes'));
+app.use("/api/notifications", require('./routes/notifications.routes'));
 
 // mongo
 mongoose
@@ -56,6 +60,10 @@ io.on("connection", (socket) => {
     socket.join(eventId);
   });
 
+  socket.on("join-user", (userId) => {
+    socket.join(userId);
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
@@ -63,6 +71,6 @@ io.on("connection", (socket) => {
 
 // server
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () =>
+server.listen(PORT, '0.0.0.0', () =>
   console.log("Server running on port", PORT)
 );

@@ -84,7 +84,9 @@ const translations = {
         language: "Idioma",
         save_changes: "Guardar Alterações",
         saving: "A guardar...",
-        success_update: "Perfil atualizado com sucesso!"
+        success_update: "Perfil atualizado com sucesso!",
+        management: "Gestão",
+        admin_panel: "Painel de Admin"
     },
     en: {
         // Navigation & Common
@@ -162,7 +164,9 @@ const translations = {
         language: "Language",
         save_changes: "Save Changes",
         saving: "Saving...",
-        success_update: "Profile updated successfully!"
+        success_update: "Profile updated successfully!",
+        management: "Management",
+        admin_panel: "Admin Panel"
     }
 };
 

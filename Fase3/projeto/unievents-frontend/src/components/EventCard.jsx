@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { getImageUrl } from '../utils/config';
 
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const EventCard = ({ event }) => {
 
   return (
     <div
-      onClick={() => navigate(`/evento/${event._id}`)}
+      onClick={() => navigate(`/evento/${event._id}`, { state: { fromFeed: true } })}
       style={{
         backgroundColor: 'var(--color-primary)', // Laranja background card
         padding: '10px 10px 0 10px',
@@ -31,7 +32,7 @@ const EventCard = ({ event }) => {
         backgroundColor: '#ddd'
       }}>
         <img
-          src={event.image?.startsWith('http') ? event.image : (event.image ? `http://localhost:4000/uploads/${event.image}` : "https://placehold.co/600x400?text=Sem+Imagem")}
+          src={getImageUrl(event.image)}
           alt={displayTitle}
           onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400?text=Sem+Imagem"; }}
           referrerPolicy="no-referrer"

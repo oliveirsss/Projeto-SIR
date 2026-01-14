@@ -39,17 +39,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            <Route path="/" element={
-              <PrivateRoute>
-                <EventFeed />
-              </PrivateRoute>
-            } />
+            <Route path="/" element={<EventFeed />} />
 
-            <Route path="/evento/:id" element={
-              <PrivateRoute>
-                <EventDetails />
-              </PrivateRoute>
-            } />
+            <Route path="/evento/:id" element={<EventDetails />} />
 
             <Route path="/create" element={
               <PrivateRoute>

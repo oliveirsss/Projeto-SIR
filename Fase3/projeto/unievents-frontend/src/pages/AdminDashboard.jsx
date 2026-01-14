@@ -3,6 +3,8 @@ import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import ConfirmationModal from '../components/ConfirmationModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { getImageUrl } from '../utils/config';
 
 export default function AdminDashboard() {
     const { t } = useLanguage();
@@ -115,7 +117,7 @@ export default function AdminDashboard() {
     };
 
 
-    if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>A carregar painel...</div>;
+    if (loading) return <LoadingSpinner />;
 
     return (
         <div style={{ padding: '2rem', minHeight: '100vh', backgroundColor: '#F9FAFB', paddingTop: '80px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -248,7 +250,7 @@ export default function AdminDashboard() {
                                         <div style={{
                                             width: '48px', height: '48px', borderRadius: '50%',
                                             backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            backgroundImage: u.photo ? `url(http://localhost:4000/uploads/${u.photo})` : 'none',
+                                            backgroundImage: u.photo ? `url(${getImageUrl(u.photo)})` : 'none',
                                             backgroundSize: 'cover', backgroundPosition: 'center',
                                             fontSize: '1.2rem', fontWeight: 'bold', color: '#666'
                                         }}>

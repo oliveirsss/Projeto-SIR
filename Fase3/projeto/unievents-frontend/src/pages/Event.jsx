@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../services/api";
 import socket from "../services/socket";
 import { useAuth } from "../context/AuthContext";
+import { getImageUrl } from "../utils/config";
 
 export default function Event() {
   const { id } = useParams();
@@ -107,7 +108,7 @@ export default function Event() {
     <div style={{ padding: "1rem" }}>
       {event.image && (
         <img
-          src={`http://localhost:4000/uploads/${event.image}`}
+          src={getImageUrl(event.image)}
           alt={event.title}
           style={{ width: "100%", marginBottom: "1rem" }}
         />

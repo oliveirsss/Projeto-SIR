@@ -1,5 +1,7 @@
 const Event = require('../models/Event');
 const Rsvp = require('../models/Rsvp');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 exports.createEvent = async (req, res) => {
   try {
@@ -11,6 +13,26 @@ exports.createEvent = async (req, res) => {
 
     const event = new Event(data);
     await event.save();
+
+    // Notificar todos os estudantes
+    const students = await User.find({ type: 'student' });
+    if (students.length > 0) {
+      const notifications = students.map(student => ({
+        recipient: student._id,
+        type: 'new_event',
+        message: `Novo evento publicado: ${event.title}`,
+        relatedId: event._id
+      }));
+      const createdNotifications = await Notification.insertMany(notifications);
+
+      // Enviar notificação em tempo real
+      const io = req.app.get('io');
+      if (io) {
+        createdNotifications.forEach(notif => {
+          io.to(notif.recipient.toString()).emit('new-notification', notif);
+        });
+      }
+    }
 
     res.status(201).json(event);
   } catch (err) {
@@ -94,7 +116,13 @@ exports.updateEvent = async (req, res) => {
     if (ev.organizerId.toString() !== req.user._id.toString() && req.user.type !== 'admin') {
       return res.status(403).json({ message: 'Forbidden' });
     }
-    Object.assign(ev, req.body);
+
+    const updates = { ...req.body };
+    if (req.file) {
+      updates.image = `/uploads/${req.file.filename}`;
+    }
+
+    Object.assign(ev, updates);
     await ev.save();
     res.json(ev);
   } catch (err) {

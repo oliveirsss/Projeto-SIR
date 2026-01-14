@@ -7,7 +7,7 @@ const { authMiddleware, requireRole } = require('../middleware/auth.middleware')
 const upload = require("../middleware/upload.middleware");
 
 
-router.put('/:id', authMiddleware, eventCtrl.updateEvent);
+router.put('/:id', authMiddleware, upload.single('image'), eventCtrl.updateEvent);
 router.delete('/:id', authMiddleware, eventCtrl.deleteEvent);
 
 router.get('/:id/comments', commentCtrl.getComments);

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
+import { getImageUrl } from "../utils/config";
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function CreateEvent() {
           setCategory(ev.category);
           setIsFree(ev.isFree);
           // setPrice(ev.price || "");
-          if (ev.image) setPreview(`http://localhost:4000${ev.image}`);
+          if (ev.image) setPreview(getImageUrl(ev.image));
         })
         .catch(err => setError(t("error")))
         .finally(() => setLoading(false));

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import socket from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { getImageUrl } from "../utils/config";
 
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -11,6 +12,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 export default function EventDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const { t, language } = useLanguage();
 
@@ -31,6 +33,8 @@ export default function EventDetails() {
     // Modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToDelete, setCommentToDelete] = useState(null);
+    const [alertModalOpen, setAlertModalOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
 
     // Load Data
     useEffect(() => {
@@ -96,7 +100,13 @@ export default function EventDetails() {
 
     // Handle RSVP
     async function toggleRsvp() {
-        if (!user || saving) return;
+        if (saving) return;
+
+        if (!user) {
+            navigate("/login", { state: { from: location } });
+            return;
+        }
+
         setSaving(true);
         try {
             if (isSaved) {
@@ -127,6 +137,25 @@ export default function EventDetails() {
             alert(t("error"));
         }
     }
+
+    // Social Sharing
+    const shareUrl = window.location.href;
+    const displayTitleStr = event ? ((language === 'en' && event.titleEn && event.titleEn.trim()) ? event.titleEn : event.title) : "";
+    const shareText = `Check out this event: ${displayTitleStr}`;
+
+    const handleShareWhatsapp = () => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+    };
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setAlertMessage("Link copiado para a área de transferência!");
+            setAlertModalOpen(true);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    };
 
     const requestDeleteComment = (comment) => {
         setCommentToDelete(comment);
@@ -163,17 +192,27 @@ export default function EventDetails() {
                 pointerEvents: 'none'
             }}>
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => {
+                        if (location.state?.fromFeed) {
+                            navigate(-1);
+                        } else {
+                            navigate('/');
+                        }
+                    }}
                     style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', pointerEvents: 'auto' }}
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    {location.state?.fromFeed ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    )}
                 </button>
             </nav>
 
             {/* Hero Image */}
             <div style={{ height: '350px', backgroundColor: '#ddd', position: 'relative' }}>
                 <img
-                    src={event.image?.startsWith('http') ? event.image : (event.image ? `http://localhost:4000/uploads/${event.image}` : "https://placehold.co/800x600?text=No+Image")}
+                    src={getImageUrl(event.image)}
                     alt={event.title}
                     onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/800x600?text=No+Image"; }}
                     referrerPolicy="no-referrer"
@@ -227,6 +266,34 @@ export default function EventDetails() {
                     </div>
                 </div>
 
+                {/* Social Sharing */}
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '2rem' }}>
+                    <button
+                        onClick={handleShareWhatsapp}
+                        style={{
+                            flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+                            backgroundColor: '#25D366', color: 'white', fontWeight: '600',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        WhatsApp
+                    </button>
+                    <button
+                        onClick={handleCopyLink}
+                        style={{
+                            flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #E5E7EB',
+                            backgroundColor: 'white', color: '#374151', fontWeight: '600',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copiar Link
+                    </button>
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', padding: '1rem', border: '1px solid #eee', borderRadius: '12px' }}>
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -273,7 +340,7 @@ export default function EventDetails() {
                                         height: '32px',
                                         borderRadius: '50%',
                                         backgroundColor: '#f0f0f0',
-                                        backgroundImage: comment.userId?.photo ? `url(http://localhost:4000/uploads/${comment.userId.photo})` : 'none',
+                                        backgroundImage: comment.userId?.photo ? `url(${getImageUrl(comment.userId.photo)})` : 'none',
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center',
                                         display: 'flex',
@@ -375,6 +442,15 @@ export default function EventDetails() {
                 onConfirm={confirmDeleteComment}
                 title={t("delete") + "?"}
                 message="Tem a certeza que pretende apagar este comentário? Esta ação é irreversível."
+            />
+
+            {/* Alert Modal */}
+            <ConfirmationModal
+                isOpen={alertModalOpen}
+                onClose={() => setAlertModalOpen(false)}
+                title="UniEvents"
+                message={alertMessage}
+                isAlert={true}
             />
 
         </div>

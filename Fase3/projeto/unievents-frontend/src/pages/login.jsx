@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +10,10 @@ export default function Login() {
   const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -20,9 +24,16 @@ export default function Login() {
 
       const user = JSON.parse(localStorage.getItem("user"));
 
-      navigate("/"); // Redirect to home/feed for all users for now
-    } catch {
-      setError(t("error"));
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
+    } catch (err) {
+      let message = err.message || t("error");
+      if (message === 'Invalid credentials') {
+        message = "Email ou palavra-chave incorretos";
+      }
+      setError(message);
+      setModalMessage(message);
+      setModalOpen(true);
     }
   }
 
@@ -145,11 +156,19 @@ export default function Login() {
 
           <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
             <p style={{ color: '#6B7280', fontSize: '0.95rem' }}>
-              {t("dont_have_account")} <Link to="/register" style={{ color: 'var(--color-primary)', fontWeight: '700', textDecoration: 'none' }}>{t("register")}</Link>
+              {t("dont_have_account")} <Link to="/register" state={location.state} style={{ color: 'var(--color-primary)', fontWeight: '700', textDecoration: 'none' }}>{t("register")}</Link>
             </p>
           </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="UniEvents"
+        message={modalMessage}
+        confirmText="Tentar de novo"
+        isAlert={true}
+      />
     </div>
   );
 }

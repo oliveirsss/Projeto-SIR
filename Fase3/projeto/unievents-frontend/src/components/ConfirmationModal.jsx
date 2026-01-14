@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, message }) {
+export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText, confirmColor, isAlert }) {
     if (!isOpen) return null;
 
     return (
@@ -33,38 +33,43 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
                 </p>
 
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                    {!isAlert && (
+                        <button
+                            onClick={onClose}
+                            style={{
+                                padding: '12px 24px',
+                                borderRadius: '12px',
+                                border: '1px solid #E5E7EB',
+                                backgroundColor: 'white',
+                                color: '#374151',
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                flex: 1
+                            }}
+                        >
+                            {cancelText || 'Cancelar'}
+                        </button>
+                    )}
                     <button
-                        onClick={onClose}
-                        style={{
-                            padding: '12px 24px',
-                            borderRadius: '12px',
-                            border: '1px solid #E5E7EB',
-                            backgroundColor: 'white',
-                            color: '#374151',
-                            fontSize: '1rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            flex: 1
+                        onClick={() => {
+                            if (onConfirm) onConfirm();
+                            onClose();
                         }}
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={onConfirm}
                         style={{
                             padding: '12px 24px',
                             borderRadius: '12px',
                             border: 'none',
-                            backgroundColor: '#EF4444',
+                            backgroundColor: confirmColor || (isAlert ? 'var(--color-primary)' : '#EF4444'),
                             color: 'white',
                             fontSize: '1rem',
                             fontWeight: 600,
                             cursor: 'pointer',
                             flex: 1,
-                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
+                            boxShadow: `0 4px 12px ${confirmColor || (isAlert ? 'rgba(255,152,0,0.3)' : 'rgba(239, 68, 68, 0.2)')}`
                         }}
                     >
-                        Apagar
+                        {confirmText || (isAlert ? 'OK' : 'Apagar')}
                     </button>
                 </div>
             </div>

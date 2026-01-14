@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -10,6 +10,7 @@ export default function Register() {
     const [error, setError] = useState("");
     const { register } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useLanguage();
 
     async function handleRegister(e) {
@@ -19,8 +20,9 @@ export default function Register() {
         try {
             await register(name, email, password);
             // If successful, register function in context handles token storage
-            // and we just redirect to home
-            navigate("/");
+            // and we just redirect to home or previous page
+            const from = location.state?.from?.pathname || "/";
+            navigate(from, { replace: true });
         } catch (err) {
             setError(t("error"));
         }

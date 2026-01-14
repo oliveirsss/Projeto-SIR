@@ -4,9 +4,13 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getImageUrl } from '../utils/config';
+import socket from '../services/socket';
+import { useNavigate } from 'react-router-dom';
 
 const EventFeed = () => {
     const { user } = useAuth();
+    // Removed debug log
     const { t } = useLanguage();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,6 +19,12 @@ const EventFeed = () => {
     const [statusFilter, setStatusFilter] = useState(() => sessionStorage.getItem('feed_status') || "upcoming");
     const [search, setSearch] = useState(() => sessionStorage.getItem('feed_search') || "");
     const [savedIds, setSavedIds] = useState([]);
+
+    // Notifications State
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotif, setShowNotif] = useState(false);
+    const navigate = useNavigate();
 
     // Persistence: Save filters and search
     useEffect(() => {
@@ -65,7 +75,65 @@ const EventFeed = () => {
         }
 
         loadData();
+        loadData();
     }, [statusFilter]);
+
+    // Socket & Notifications
+    useEffect(() => {
+        if (user) {
+            socket.connect();
+            socket.emit('join-user', user._id);
+
+            // Listen for new notifications
+            const handleNewNotification = (notif) => {
+                setNotifications(prev => [notif, ...prev]);
+                setUnreadCount(prev => prev + 1);
+            };
+
+            socket.on('new-notification', handleNewNotification);
+
+            // Fetch initial notifications
+            api.get('/notifications')
+                .then(res => {
+                    setNotifications(res.data);
+                    setUnreadCount(res.data.filter(n => !n.read).length);
+                })
+                .catch(err => console.error("Error fetching notifications", err));
+
+            return () => {
+                socket.off('new-notification', handleNewNotification);
+                socket.disconnect();
+            };
+        }
+    }, [user]);
+
+    const handleNotificationClick = async (notif) => {
+        if (!notif.read) {
+            try {
+                await api.patch(`/notifications/${notif._id}/read`);
+                setNotifications(prev => prev.map(n =>
+                    n._id === notif._id ? { ...n, read: true } : n
+                ));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            } catch (err) {
+                console.error("Error marking read", err);
+            }
+        }
+        setShowNotif(false);
+        if (notif.relatedId) {
+            navigate(`/evento/${notif.relatedId}`);
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            await api.patch('/notifications/read-all');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const applyFilters = () => {
         let filtered = [...events];
@@ -114,27 +182,163 @@ const EventFeed = () => {
                     <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{t("find_best_events")}</p>
                 </div>
 
-                {/* Avatar */}
-                <div
-                    onClick={() => window.location.href = '/profile'}
-                    style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: 'white',
-                        backgroundImage: user?.photo ? `url(http://localhost:4000/uploads/${user.photo})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        color: 'var(--color-primary)',
-                        fontWeight: 'bold',
-                        border: '2px solid rgba(255,255,255,0.2)'
-                    }}
-                >
-                    {!user?.photo && user?.name?.charAt(0).toUpperCase()}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {/* Role-based Header Action */}
+                    <div style={{ position: 'relative' }}>
+                        {user?.type === 'admin' ? (
+                            <button
+                                onClick={() => navigate('/admin')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '40px',
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                            </button>
+                        ) : user?.type === 'organizer' ? (
+                            <button
+                                onClick={() => navigate('/create')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '40px',
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        ) : (
+                            /* Notification Bell for Students/Others */
+                            <>
+                                <button
+                                    onClick={() => setShowNotif(!showNotif)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.2)',
+                                        border: 'none',
+                                        borderRadius: '50%',
+                                        width: '40px',
+                                        height: '40px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                    </svg>
+                                    {unreadCount > 0 && (
+                                        <span style={{
+                                            position: 'absolute',
+                                            top: '0',
+                                            right: '0',
+                                            backgroundColor: '#ff4444',
+                                            color: 'white',
+                                            fontSize: '0.7rem',
+                                            width: '18px',
+                                            height: '18px',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: '2px solid var(--header-bg)'
+                                        }}>
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Notification Dropdown */}
+                                {showNotif && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '50px',
+                                        right: '-10px',
+                                        width: '300px',
+                                        backgroundColor: 'white',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                                        color: '#333',
+                                        zIndex: 1000,
+                                        overflow: 'hidden'
+                                    }}>
+                                        <div style={{ padding: '10px 15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontWeight: 600 }}>Notificações</span>
+                                            {unreadCount > 0 && (
+                                                <button onClick={handleMarkAllRead} style={{ fontSize: '0.8rem', color: 'var(--color-primary)', border: 'none', background: 'none', cursor: 'pointer' }}>
+                                                    Marcar todas como lidas
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                            {notifications.length === 0 ? (
+                                                <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>
+                                                    Sem notificações
+                                                </div>
+                                            ) : (
+                                                notifications.map(notif => (
+                                                    <div
+                                                        key={notif._id}
+                                                        onClick={() => handleNotificationClick(notif)}
+                                                        style={{
+                                                            padding: '12px 15px',
+                                                            borderBottom: '1px solid #f5f5f5',
+                                                            cursor: 'pointer',
+                                                            backgroundColor: notif.read ? 'white' : '#f0f7ff',
+                                                            transition: 'background 0.2s',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    >
+                                                        <div style={{ marginBottom: '4px' }}>{notif.message}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                            {new Date(notif.createdAt).toLocaleDateString()} {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                    <div
+                        onClick={() => window.location.href = '/profile'}
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            backgroundColor: 'white',
+                            backgroundImage: user?.photo ? `url(${getImageUrl(user.photo)})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: 'var(--color-primary)',
+                            fontWeight: 'bold',
+                            border: '2px solid rgba(255,255,255,0.2)'
+                        }}
+                    >
+                        {!user?.photo && user?.name?.charAt(0).toUpperCase()}
+                    </div>
                 </div>
             </div>
 
@@ -234,33 +438,9 @@ const EventFeed = () => {
                     )}
                 </div>
 
-                {/* Floating Action Button (Create) - Use Standard FAB again */}
-                {user?.type === 'organizer' && (
-                    <button
-                        onClick={() => window.location.href = '/create'}
-                        style={{
-                            position: 'fixed',
-                            bottom: '20px',
-                            right: '20px',
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '50%',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'white',
-                            border: 'none',
-                            boxShadow: '0 4px 10px rgba(255, 152, 0, 0.4)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 100
-                        }}
-                    >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                )}
+
             </div>
-        </div>
+        </div >
     );
 };
 

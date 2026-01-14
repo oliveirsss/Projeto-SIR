@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import api from "../services/api";
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getImageUrl } from "../utils/config";
 
 export default function Profile() {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function Profile() {
 
     // Preview state for immediate feedback
     const [preview, setPreview] = useState(
-        user?.photo ? `http://localhost:4000/uploads/${user.photo}` : null
+        user?.photo ? getImageUrl(user.photo) : null
     );
 
     const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
@@ -27,7 +28,7 @@ export default function Profile() {
             setName(user.name);
             setEmail(user.email);
             if (user.photo && !preview?.startsWith('blob:')) {
-                setPreview(`http://localhost:4000/uploads/${user.photo}`);
+                setPreview(getImageUrl(user.photo));
             }
         }
     }, [user]);
@@ -312,7 +313,7 @@ export default function Profile() {
                     {/* Management Section (Admin/Organizer) */}
                     {(user?.type === 'admin' || user?.type === 'organizer') && (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', fontWeight: 600, color: '#4B5563' }}>Gestão</label>
+                            <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', fontWeight: 600, color: '#4B5563' }}>{t("management")}</label>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {user.type === 'admin' && (
                                     <button
@@ -334,7 +335,7 @@ export default function Profile() {
                                         }}
                                     >
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                                        Painel de Admin
+                                        {t("admin_panel")}
                                     </button>
                                 )}
                                 {user.type === 'organizer' && (
@@ -357,7 +358,7 @@ export default function Profile() {
                                         }}
                                     >
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                                        Criar Evento
+                                        {t("create_event")}
                                     </button>
                                 )}
                             </div>
